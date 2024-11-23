@@ -1,0 +1,582 @@
+{
+	"info": {
+		"_postman_id": "54172d46-4483-41d0-a4fe-87b011c8c73f",
+		"name": "Todoly-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39273645"
+	},
+	"item": [
+		{
+			"name": "Delete project by id",
+			"item": [
+				{
+					"name": "Post",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generating a random number for the icon",
+									"var randomNumber = Math.floor(Math.random() * 15);",
+									"pm.variables.set(\"iconNumber\", randomNumber); // Temporary variable, only for this request",
+									"",
+									"// Generating a random job title",
+									"var randomName = pm.variables.replaceIn(\"{{$randomJobTitle}}\");",
+									"pm.variables.set(\"projectName\", randomName); // Temporary variable, only for this request",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Estatus es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Respuesta menor a 2[s]\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"pm.test(\"Id es número\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"projectId\", jsonData.Id);",
+									"    pm.expect(jsonData.Id).to.be.a('number');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response es JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Icono adecuado\", function () {",
+									"    pm.expect(pm.response.json().Icon).to.eql(pm.variables.get(\"iconNumber\"));",
+									"});",
+									"let response = pm.response.json();",
+									"pm.collectionVariables.set(\"lastCreatedId\", response.Id);",
+									"console.log(\"Stored ID:\", pm.collectionVariables.get(\"lastCreatedId\"));",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{userName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Content\": \"{{projectName}}\",\n    \"Icon\": \"{{iconNumber}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}projects.json",
+							"host": [
+								"{{url}}projects",
+								"json"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.log(pm.variables.get(\"lastCreatedId\"))"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Código de estado 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Id en respuesta es igual a la peticion\", function () {",
+									"    var responseId = pm.response.json().Id;",
+									"    var requestId = pm.collectionVariables.get(\"lastCreatedId\"); // ID set in the POST request",
+									"    pm.expect(responseId).to.eql(parseInt(requestId));",
+									"});",
+									"",
+									"pm.test(\"Si el proyecto fue eliminado\", function () {",
+									"    var deletedStatus = pm.response.json().Deleted;",
+									"    pm.expect(deletedStatus).to.eql(true);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response es JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Icono es número\", function () {",
+									"    var icon = pm.response.json().Icon;",
+									"    pm.expect(icon).to.be.a('number');",
+									"});",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{userName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}projects/{{lastCreatedId}}.json",
+							"host": [
+								"{{url}}projects"
+							],
+							"path": [
+								"{{lastCreatedId}}.json"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Get items of a project",
+			"item": [
+				{
+					"name": "Post",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generating a random number for the icon",
+									"var randomNumber = Math.floor(Math.random() * 15);",
+									"pm.variables.set(\"iconNumber\", randomNumber); // Temporary variable, only for this request",
+									"",
+									"// Generating a random job title",
+									"var randomName = pm.variables.replaceIn(\"{{$randomJobTitle}}\");",
+									"pm.variables.set(\"projectName\", randomName); // Temporary variable, only for this request",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Estatus es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Respuesta menor a 2[s]\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"pm.test(\"Id es número\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"projectId\", jsonData.Id);",
+									"    pm.expect(jsonData.Id).to.be.a('number');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response es JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Icono adecuado\", function () {",
+									"    pm.expect(pm.response.json().Icon).to.eql(pm.variables.get(\"iconNumber\"));",
+									"});",
+									"let response = pm.response.json();",
+									"pm.collectionVariables.set(\"lastCreatedId\", response.Id);",
+									"console.log(\"Stored ID:\", pm.collectionVariables.get(\"lastCreatedId\"));",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{userName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Content\": \"{{projectName}}\",\n    \"Icon\": \"{{iconNumber}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}projects.json",
+							"host": [
+								"{{url}}projects",
+								"json"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Estatus es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Respuesta menor a 2[s]\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"",
+									"",
+									"",
+									"pm.test(\"Response es JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Respuesta es un arreglo\", function () {",
+									"    var responseData = pm.response.json();",
+									"    pm.expect(responseData).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Cuerpo de respuesta no es vacia\", function () {",
+									"    pm.expect(pm.response.text()).to.not.be.empty;",
+									"});",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{userName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}projects/{{lastCreatedId}}/items.json",
+							"host": [
+								"{{url}}projects"
+							],
+							"path": [
+								"{{lastCreatedId}}",
+								"items.json"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Get done items of a products",
+			"item": [
+				{
+					"name": "Get",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Estatus es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Respuesta menor a 2[s]\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"",
+									"",
+									"",
+									"pm.test(\"Response es JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Respuesta es un arreglo\", function () {",
+									"    var responseData = pm.response.json();",
+									"    pm.expect(responseData).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Cuerpo de respuesta no es vacia\", function () {",
+									"    pm.expect(pm.response.text()).to.not.be.empty;",
+									"});",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{userName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}projects/{{lastCreatedId}}/doneitems.json",
+							"host": [
+								"{{url}}projects"
+							],
+							"path": [
+								"{{lastCreatedId}}",
+								"doneitems.json"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Get-list-of-filters",
+			"item": [
+				{
+					"name": "Get",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Estatus es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Respuesta menor a 2[s]\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"",
+									"",
+									"",
+									"pm.test(\"Response es JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Respuesta es un arreglo\", function () {",
+									"    var responseData = pm.response.json();",
+									"    pm.expect(responseData).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Cuerpo de respuesta no es vacia\", function () {",
+									"    pm.expect(pm.response.text()).to.not.be.empty;",
+									"});",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{userName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/filters.json",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"filters.json"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "lastCreatedId",
+			"value": ""
+		}
+	]
+}
